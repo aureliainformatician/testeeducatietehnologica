@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TESTUL 1 - Textile (Neon Blue)</title>
+<style>
+  :root {
+    --neon-blue: #00f3ff;
+    --neon-glow: rgba(0, 243, 255, 0.4);
+    --dark-bg: #090d16;
+    --card-bg: #111827;
+    --text-main: #f1f5f9;
+    --accent-green: #00ff88;
+    --accent-red: #ff3366;
+  }
+
+  * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+  body { background: var(--dark-bg); color: var(--text-main); margin: 0; padding: 20px; }
+  .quiz-container { max-width: 900px; margin: 0 auto; background: var(--card-bg); padding: 30px; border-radius: 12px; border: 1px solid var(--neon-blue); box-shadow: 0 0 25px var(--neon-glow); }
+
+  h1 { text-align: center; color: var(--neon-blue); text-shadow: 0 0 12px var(--neon-blue); margin-bottom: 5px; font-size: 26px; }
+  .subtitle { text-align: center; color: #94a3b8; margin-bottom: 25px; font-size: 14px; }
+
+  /* Timer Bar */
+  .timer-bar { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 12px 20px; border-radius: 8px; border: 1px solid var(--neon-blue); margin-bottom: 25px; box-shadow: inset 0 0 10px var(--neon-glow); }
+  .timer-display { font-size: 24px; font-weight: bold; color: var(--neon-blue); text-shadow: 0 0 8px var(--neon-blue); }
+  .timer-btn { background: transparent; border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 6px 14px; border-radius: 4px; cursor: pointer; transition: 0.2s; font-weight: 600; }
+  .timer-btn:hover { background: var(--neon-blue); color: var(--dark-bg); box-shadow: 0 0 12px var(--neon-blue); }
+
+  /* Section Styling */
+  .section { margin-bottom: 30px; border: 1px solid rgba(0, 243, 255, 0.3); border-radius: 8px; padding: 20px; background: rgba(15, 23, 42, 0.7); }
+  .section-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--neon-blue); padding-bottom: 8px; margin-bottom: 18px; }
+  .section-title { font-size: 18px; font-weight: bold; color: var(--neon-blue); text-transform: uppercase; letter-spacing: 0.5px; }
+  .section-points { background: rgba(0,243,255,0.15); border: 1px solid var(--neon-blue); color: var(--neon-blue); font-size: 13px; padding: 4px 10px; border-radius: 12px; font-weight: bold; }
+
+  /* Question Box */
+  .question { margin-bottom: 20px; background: #1e293b; padding: 16px; border-radius: 8px; border-left: 4px solid var(--neon-blue); position: relative; }
+  .q-title { font-weight: 600; margin: 0 0 10px 0; color: #ffffff; display: flex; justify-content: space-between; font-size: 15px; }
+  .q-points { color: var(--neon-blue); font-size: 12px; font-weight: bold; }
+
+  /* Inputs & Options */
+  .options label { display: block; margin: 8px 0; cursor: pointer; font-size: 14px; color: #cbd5e1; }
+  .options input[type="radio"] { accent-color: var(--neon-blue); margin-right: 8px; }
+  
+  input[type="text"], textarea, select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--neon-blue); background: #0f172a; color: #fff; margin-top: 8px; font-size: 14px; box-shadow: inset 0 0 6px rgba(0,243,255,0.15); }
+  textarea { resize: vertical; min-height: 60px; }
+  input[type="text"]:focus, textarea:focus, select:focus { outline: none; box-shadow: 0 0 10px var(--neon-blue); }
+
+  /* Item Buttons */
+  .item-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .btn-item { background: rgba(0, 243, 255, 0.1); border: 1px solid var(--neon-blue); color: var(--neon-blue); padding: 5px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; transition: 0.2s; font-weight: 600; }
+  .btn-item:hover { background: var(--neon-blue); color: var(--dark-bg); box-shadow: 0 0 8px var(--neon-blue); }
+
+  /* Feedback, Hints, Answers */
+  .hint-box, .answer-box { display: none; margin-top: 10px; padding: 10px; border-radius: 6px; font-size: 13px; line-height: 1.4; }
+  .hint-box { background: rgba(255, 204, 0, 0.1); border: 1px solid #ffcc00; color: #ffcc00; }
+  .answer-box { background: rgba(0, 255, 136, 0.1); border: 1px solid var(--accent-green); color: var(--accent-green); }
+  .feedback { margin-top: 8px; font-weight: bold; font-size: 13px; display: none; }
+  .feedback.correct { color: var(--accent-green); }
+  .feedback.incorrect { color: var(--accent-red); }
+
+  /* Matching Table */
+  .matching-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  .matching-table th, .matching-table td { padding: 10px; border: 1px solid rgba(0, 243, 255, 0.2); text-align: left; font-size: 14px; }
+  .matching-table th { background: #0f172a; color: var(--neon-blue); }
+
+  /* Main Action Bar */
+  .main-actions { text-align: center; margin-top: 30px; display: flex; justify-content: center; gap: 15px; }
+  .btn-main { background: var(--neon-blue); color: var(--dark-bg); border: none; padding: 14px 32px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; box-shadow: 0 0 15px var(--neon-glow); transition: 0.2s; text-transform: uppercase; }
+  .btn-main:hover { transform: translateY(-2px); box-shadow: 0 0 25px var(--neon-blue); }
+  .btn-sec { background: transparent; border: 1px solid var(--neon-blue); color: var(--neon-blue); }
+
+  /* Result Box */
+  .result-box { display: none; background: #0f172a; border: 2px solid var(--neon-blue); padding: 25px; border-radius: 8px; text-align: center; margin-top: 30px; box-shadow: 0 0 25px var(--neon-glow); }
+  .score-display { font-size: 36px; font-weight: bold; color: var(--neon-blue); text-shadow: 0 0 12px var(--neon-blue); margin: 10px 0; }
+</style>
+</head>
+<body>
+
+<div class="quiz-container">
+  <h1>TESTUL 1 (Etapa Locală)</h1>
+  <p class="subtitle">Evaluare Interactivă cu Răspuns Deschis & Design Albastru Neon</p>
+
+  <!-- Cronometru Examen -->
+  <div class="timer-bar">
+    <div>
+      <span style="color:#94a3b8; font-size: 14px;">Timp Examen: </span>
+      <span class="timer-display" id="timer">45:00</span>
+    </div>
+    <div>
+      <button class="timer-btn" id="pause-btn" onclick="toggleTimer()">Pauză</button>
+      <button class="timer-btn" onclick="resetTimer()">Reset Timp</button>
+    </div>
+  </div>
+
+  <!-- SUBIECTUL I -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">SUBIECTUL I</span>
+      <span class="section-points">30 Puncte</span>
+    </div>
+
+    <!-- I.1 Grila (10p) -->
+    <p style="color: var(--neon-blue); font-weight: bold; margin-bottom: 12px;">1. Alegeți răspunsul corect (10p - 2p/item):</p>
+    
+    <div class="question" id="q-i1a">
+      <div class="q-title">a) Bumbacul este o fibră textilă de origine: <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i1a" value="A"> A. animală</label>
+        <label><input type="radio" name="i1a" value="B"> B. vegetală (de pe semințe)</label>
+        <label><input type="radio" name="i1a" value="C"> C. minerală</label>
+        <label><input type="radio" name="i1a" value="D"> D. sintetică</label>
+      </div>
+      <div class="item-actions">
+        <button class="btn-item" onclick="checkRadio('i1a', 'B', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('hint-i1a')">Indicație</button>
+        <button class="btn-item" onclick="toggle('ans-i1a')">Vezi Răspuns</button>
+      </div>
+      <div id="hint-i1a" class="hint-box">Gândește-te la capsulele plantei de bumbac.</div>
+      <div id="ans-i1a" class="answer-box">Răspuns corect: B (vegetală - de pe semințe)</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-i1b">
+      <div class="q-title">b) Proprietatea fibrelor de a absorbi vapori de apă din mediu se numește: <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i1b" value="A"> A. higroscopicitate</label>
+        <label><input type="radio" name="i1b" value="B"> B. elasticitate</label>
+        <label><input type="radio" name="i1b" value="C"> C. pilling</label>
+        <label><input type="radio" name="i1b" value="D"> D. finețe</label>
+      </div>
+      <div class="item-actions">
+        <button class="btn-item" onclick="checkRadio('i1b', 'A', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('hint-i1b')">Indicație</button>
+        <button class="btn-item" onclick="toggle('ans-i1b')">Vezi Răspuns</button>
+      </div>
+      <div id="hint-i1b" class="hint-box">Cuvântul cheie este absorbția de umiditate din aer.</div>
+      <div id="ans-i1b" class="answer-box">Răspuns corect: A (higroscopicitate)</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-i1c">
+      <div class="q-title">c) Care dintre următoarele fibre este de origine minerală? <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i1c" value="A"> A. În</label>
+        <label><input type="radio" name="i1c" value="B"> B. Mătase</label>
+        <label><input type="radio" name="i1c" value="C"> C. Azbest</label>
+        <label><input type="radio" name="i1c" value="D"> D. Poliester</label>
+      </div>
+      <div class="item-actions">
+        <button class="btn-item" onclick="checkRadio('i1c', 'C', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('hint-i1c')">Indicație</button>
+        <button class="btn-item" onclick="toggle('ans-i1c')">Vezi Răspuns</button>
+      </div>
+      <div id="hint-i1c" class="hint-box">Este o fibră extrasă din roci silicatoase.</div>
+      <div id="ans-i1c" class="answer-box">Răspuns corect: C (Azbest)</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-i1d">
+      <div class="q-title">d) Unitatea de măsură pentru densitatea / masa specifică a fibrelor este: <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i1d" value="A"> A. g/m²</label>
+        <label><input type="radio" name="i1d" value="B"> B. kg/m³</label>
+        <label><input type="radio" name="i1d" value="C"> C. g/km</label>
+        <label><input type="radio" name="i1d" value="D"> D. mm²</label>
+      </div>
+      <div class="item-actions">
+        <button class="btn-item" onclick="checkRadio('i1d', 'B', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('hint-i1d')">Indicație</button>
+        <button class="btn-item" onclick="toggle('ans-i1d')">Vezi Răspuns</button>
+      </div>
+      <div id="hint-i1d" class="hint-box">Masă raportată la volum.</div>
+      <div id="ans-i1d" class="answer-box">Răspuns corect: B (kg/m³)</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-i1e">
+      <div class="q-title">e) Reprezintă o fibră de origine sintetică: <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i1e" value="A"> A. Mătasea naturală</label>
+        <label><input type="radio" name="i1e" value="B"> B. Viscoza</label>
+        <label><input type="radio" name="i1e" value="C"> C. Poliamida (PA)</label>
+        <label><input type="radio" name="i1e" value="D"> D. Cânepa</label>
+      </div>
+      <div class="item-actions">
+        <button class="btn-item" onclick="checkRadio('i1e', 'C', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('hint-i1e')">Indicație</button>
+        <button class="btn-item" onclick="toggle('ans-i1e')">Vezi Răspuns</button>
+      </div>
+      <div id="hint-i1e" class="hint-box">Obținută integral prin sinteză chimică din compuși din petrol.</div>
+      <div id="ans-i1e" class="answer-box">Răspuns corect: C (Poliamida PA)</div>
+      <div class="feedback"></div>
+    </div>
+
+    <!-- I.2 A/F (10p) -->
+    <p style="color: var(--neon-blue); font-weight: bold; margin-top:25px; margin-bottom:12px;">2. Precizați valoarea de adevăr (Adevărat / Fals) (10p - 2p/item):</p>
+
+    <div class="question" id="q-i2a">
+      <div class="q-title">a) Lâna și mătasea naturală sunt cele mai grele fibre textile. <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i2a" value="A"> Adevărat</label>
+        <label><input type="radio" name="i2a" value="F"> Fals</label>
+      </div>
+      <div class="item-actions">
+        <button class="btn-item" onclick="checkRadio('i2a', 'F', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-i2a')">Vezi Răspuns</button>
+      </div>
+      <div id="ans-i2a" class="answer-box">Răspuns corect: Fals (Sunt printre cele mai ușoare).</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-i2b">
+      <div class="q-title">b) Pillingul reprezintă ieșirea capetelor de fibre la suprafață (formarea de scame). <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i2b" value="A"> Adevărat</label>
+        <label><input type="radio" name="i2b" value="F"> Fals</label>
+      </div>
+      <div class="item-actions">
+        <button class="btn-item" onclick="checkRadio('i2b', 'A', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-i2b')">Vezi Răspuns</button>
+      </div>
+      <div id="ans-i2b" class="answer-box">Răspuns corect: Adevărat.</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-i2c">
+      <div class="q-title">c) Bumbacul are suprafața lucioasă, iar mătasea este mată. <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i2c" value="A"> Adevărat</label>
+        <label><input type="radio" name="i2c" value="F"> Fals</label>
+      </div>
+      <div class="item-actions">
+        <button class="btn-item" onclick="checkRadio('i2c', 'F', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-i2c')">Vezi Răspuns</button>
+      </div>
+      <div id="ans-i2c" class="answer-box">Răspuns corect: Fals (Bumbacul e mat, mătasea e lucioasă).</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-i2d">
+      <div class="q-title">d) Capacitatea de filare este lungimea firului (km) obținută din 1 kg de fibre. <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i2d" value="A"> Adevărat</label>
+        <label><input type="radio" name="i2d" value="F"> Fals</label>
+      </div>
+      <div class="item-actions">
+        <button class="btn-item" onclick="checkRadio('i2d', 'A', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-i2d')">Vezi Răspuns</button>
+      </div>
+      <div id="ans-i2d" class="answer-box">Răspuns corect: Adevărat.</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-i2e">
+      <div class="q-title">e) Simbolurile de întreținere au fost introduse la inițiativa GINETEX. <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i2e" value="A"> Adevărat</label>
+        <label><input type="radio" name="i2e" value="F"> Fals</label>
+      </div>
+      <div class="item-actions">
+        <button class="btn-item" onclick="checkRadio('i2e', 'A', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-i2e')">Vezi Răspuns</button>
+      </div>
+      <div id="ans-i2e" class="answer-box">Răspuns corect: Adevărat.</div>
+      <div class="feedback"></div>
+    </div>
+
+    <!-- I.3 Asociere (10p) -->
+    <p style="color: var(--neon-blue); font-weight: bold; margin-top:25px; margin-bottom:12px;">3. Asociați fibrele din Coloana A cu originea lor din Coloana B (10p - 2p/pereche):</p>
+    <div class="question" id="q-i3">
+      <table class="matching-table">
+        <thead>
+          <tr>
+            <th>Coloana A (Fibre)</th>
+            <th>Origine / Tip (Coloana B)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1. În</td>
+            <td>
+              <select id="m1">
+                <option value="">-- Selectează --</option>
+                <option value="A">A. Origine animală (păr)</option>
+                <option value="B">B. Origine artificială (din celuloză)</option>
+                <option value="C">C. Origine vegetală (din tulpină)</option>
+                <option value="D">D. Origine minerală</option>
+                <option value="E">E. Origine sintetică</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>2. Lână</td>
+            <td>
+              <select id="m2">
+                <option value="">-- Selectează --</option>
+                <option value="A">A. Origine animală (păr)</option>
+                <option value="B">B. Origine artificială (din celuloză)</option>
+                <option value="C">C. Origine vegetală (din tulpină)</option>
+                <option value="D">D. Origine minerală</option>
+                <option value="E">E. Origine sintetică</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>3. Vâscoză</td>
+            <td>
+              <select id="m3">
+                <option value="">-- Selectează --</option>
+                <option value="A">A. Origine animală (păr)</option>
+                <option value="B">B. Origine artificială (din celuloză)</option>
+                <option value="C">C. Origine vegetală (din tulpină)</option>
+                <option value="D">D. Origine minerală</option>
+                <option value="E">E. Origine sintetică</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>4. Poliester (PES)</td>
+            <td>
+              <select id="m4">
+                <option value="">-- Selectează --</option>
+                <option value="A">A. Origine animală (păr)</option>
+                <option value="B">B. Origine artificială (din celuloză)</option>
+                <option value="C">C. Origine vegetală (din tulpină)</option>
+                <option value="D">D. Origine minerală</option>
+                <option value="E">E. Origine sintetică</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>5. Azbest</td>
+            <td>
+              <select id="m5">
+                <option value="">-- Selectează --</option>
+                <option value="A">A. Origine animală (păr)</option>
+                <option value="B">B. Origine artificială (din celuloză)</option>
+                <option value="C">C. Origine vegetală (din tulpină)</option>
+                <option value="D">D. Origine minerală</option>
+                <option value="E">E. Origine sintetică</option>
+              </select>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="item-actions">
+        <button class="btn-item" onclick="checkMatching()">Verifică Asocierea</button>
+        <button class="btn-item" onclick="toggle('ans-i3')">Vezi Răspunsuri</button>
+      </div>
+      <div id="ans-i3" class="answer-box">1-C, 2-A, 3-B, 4-E, 5-D</div>
+      <div id="fb-i3" class="feedback"></div>
+    </div>
+  </div>
+
+  <!-- SUBIECTUL II (COMPLET) -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">SUBIECTUL II</span>
+      <span class="section-points">30 Puncte</span>
+    </div>
+
+    <!-- II.1 Completare spații (15p) -->
+    <p style="color: var(--neon-blue); font-weight: bold; margin-bottom: 12px;">1. Completați spațiile libere din schema privind clasificarea proprietăților fibrelor textile (15p - 5p/termen - Răspuns Deschis):</p>
+    
+    <div class="question" id="q-ii1a">
+      <div class="q-title">a) Proprietățile mecano-fizice includ: Rezistența, Elasticitatea, Pillingul și: <span class="q-points">(5p)</span></div>
+      <input type="text" id="open-ii1a" placeholder="Escriu proprietatea (capacitatea de a reveni la forma inițială / densitatea / tușeul)...">
+      <div class="item-actions">
+        <button class="btn-item" onclick="checkText('open-ii1a', ['elasticitat', 'elasticitatea', 'densitat', 'tușeu', 'tuseu'], 5)">Verifică</button>
+        <button class="btn-item" onclick="toggle('hint-ii1a')">Indicație</button>
+        <button class="btn-item" onclick="toggle('ans-ii1a')">Vezi Răspuns</button>
+      </div>
+      <div id="hint-ii1a" class="hint-box">Barem acceptă: Elasticitatea (capacitatea de revenirie) sau densitatea / tușeul.</div>
+      <div id="ans-ii1a" class="answer-box">Răspuns corect conform barem: Elasticitatea (sau densitatea / tușeul).</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-ii1b">
+      <div class="q-title">b) Proprietățile tehnologice sunt: Capacitatea de filare, Capacitatea de: <span class="q-points">(5p)</span></div>
+      <input type="text" id="open-ii1b" placeholder="Escriu termenul...">
+      <div class="item-actions">
+        <button class="btn-item" onclick="checkText('open-ii1b', ['acoperire', 'acoperirea'], 5)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-ii1b')">Vezi Răspuns</button>
+      </div>
+      <div id="ans-ii1b" class="answer-box">Răspuns corect: Acoperire.</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-ii1c">
+      <div class="q-title">c) și proprietatea specifică fibrelor de lână de a se apropia și prinde între ele: <span class="q-points">(5p)</span></div>
+      <input type="text" id="open-ii1c" placeholder="Escriu proprietatea lânii...">
+      <div class="item-actions">
+        <button class="btn-item" onclick="checkText('open-ii1c', ['împâslire', 'impaslire', 'împâslirea', 'impaslirea'], 5)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-ii1c')">Vezi Răspuns</button>
+      </div>
+      <div id="ans-ii1c" class="answer-box">Răspuns corect: Împâslirea.</div>
+      <div class="feedback"></div>
+    </div>
+
+    <!-- II.2 Cerințe bumbac (15p) -->
+    <p style="color: var(--neon-blue); font-weight: bold; margin-top: 25px; margin-bottom: 12px;">2. Aplicație practică articole din bumbac (15p - Răspuns Deschis):</p>
+
+    <div class="question" id="q-ii2a">
+      <div class="q-title">a) Explicați cerințele de spălare și călcare pentru bumbac, având în vedere higroscopicitatea și rezistența la temperatură ridicată: <span class="q-points">(5p)</span></div>
+      <textarea id="open-ii2a" placeholder="Explicați spălarea (până la 95°C) și călcarea la temperaturi mari (150-200°C)..."></textarea>
+      <div class="item-actions">
+        <button class="btn-item" onclick="checkText('open-ii2a', ['temperatur', '95', '200', 'cald', 'rezist'], 5)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-ii2a')">Vezi Răspuns Barem</button>
+      </div>
+      <div id="ans-ii2a" class="answer-box">Bumbacul suportă temperaturi înalte la spălare (până la 95°C) și călcare la temperaturi mari (150–200°C) deoarece are o rezistență termică foarte bună.</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-ii2b">
+      <div class="q-title">b) Menționați două avantaje și un dezavantaj ale îmbrăcămintei din bumbac comparativ cu o sintetică: <span class="q-points">(10p)</span></div>
+      <input type="text" id="open-ii2b-adv1" placeholder="Avantaj 1 (ex. higroscopicitate / absorbție transpirație)..." style="margin-bottom:8px;">
+      <input type="text" id="open-ii2b-adv2" placeholder="Avantaj 2 (ex. tușeu moale / confort pe piele)..." style="margin-bottom:8px;">
+      <input type="text" id="open-ii2b-dis" placeholder="Dezavantaj (ex. se șifonează ușor)...">
+      <div class="item-actions">
+        <button class="btn-item" onclick="checkDiffs()">Verifică Avantaje/Dezavantaj</button>
+        <button class="btn-item" onclick="toggle('ans-ii2b')">Vezi Răspuns Barem</button>
+      </div>
+      <div id="ans-ii2b" class="answer-box">
+        <strong>Avantaje:</strong> Absorbție bună a transpirației / higroscopicitate ridicată, tușeu plăcut / moale pe piele.<br>
+        <strong>Dezavantaj:</strong> Se șifonează ușor / elasticitate mai redusă comparativ cu fibrele sintetice.
+      </div>
+      <div id="fb-ii2b" class="feedback"></div>
+    </div>
+  </div>
+
+  <!-- SUBIECTUL III -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">SUBIECTUL III - Proiectare Etichetă</span>
+      <span class="section-points">30 Puncte</span>
+    </div>
+
+    <p style="color: var(--neon-blue); font-weight: bold; margin-bottom: 12px;">Proiectați eticheta de întreținere pentru un tricou din bumbac 100% (Răspuns Deschis):</p>
+
+    <div class="question" id="q-iii1">
+      <div class="q-title">1. Precizați cele 4 simboluri internaționale de întreținere adecvate (spălare, înălbire, călcare, uscare/curățare): <span class="q-points">(15p)</span></div>
+      <textarea id="open-iii1" placeholder="Specificați simbolurile (ex: cuva cu apă 95°C/60°C, triunghiul, fierul cu 3 puncte, cercul/pătratul cu cerc)..."></textarea>
+      <div class="item-actions">
+        <button class="btn-item" onclick="checkText('open-iii1', ['vas', 'cuv', 'triunghi', 'fier', 'punct', 'cerc'], 15)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-iii1')">Vezi Răspuns Barem</button>
+      </div>
+      <div id="ans-iii1" class="answer-box">1. Vasul/cuva cu apă (temp înaltă 60-95°C). 2. Triunghiul (înălbire/clorare). 3. Fierul cu 3 puncte (200°C). 4. Cercul sau pătratul cu cerc (uscare/curățare).</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-iii2">
+      <div class="q-title">2. Descrieți în scris semnificația celor 4 simboluri menționate: <span class="q-points">(10p)</span></div>
+      <textarea id="open-iii2" placeholder="Descrieți ce reprezintă fiecare simbol ales..."></textarea>
+      <div class="item-actions">
+        <button class="btn-item" onclick="checkText('open-iii2', ['spălare', 'spalare', 'înălbire', 'inalbire', 'călcare', 'calcare', 'uscare', 'curățare'], 10)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-iii2')">Vezi Răspuns Barem</button>
+      </div>
+      <div id="ans-iii2" class="answer-box">Spălare la temperatură înaltă/normală, se permite înălbirea cu clor, călcare la temperatură mare (200°C), curățare profesională / uscare în tambur.</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-iii3">
+      <div class="q-title">3. Specificați o proprietate fizico-mecanică a bumbacului care justifică recomandările de pe etichetă: <span class="q-points">(5p)</span></div>
+      <input type="text" id="open-iii3" placeholder="Escriu proprietatea fizico-mecanică...">
+      <div class="item-actions">
+        <button class="btn-item" onclick="checkText('open-iii3', ['higroscop', 'termic', 'rezistenț', 'rezistent'], 5)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-iii3')">Vezi Răspuns Barem</button>
+      </div>
+      <div id="ans-iii3" class="answer-box">Rezistența termică mare sau Higroscopicitatea ridicată.</div>
+      <div class="feedback"></div>
+    </div>
+  </div>
+
+  <!-- MAIN ACTION BUTTONS -->
+  <div class="main-actions">
+    <button class="btn-main" onclick="checkFullQuiz()">Verifică Tot Testul (Calculează Nota)</button>
+    <button class="btn-main btn-sec" onclick="returnToTest()">Revin la Rezolvare Test</button>
+  </div>
+
+  <!-- RESULT BOX -->
+  <div class="result-box" id="result-box">
+    <h2 style="color:var(--neon-blue); margin-top:0;">Rezultatul Evaluării</h2>
+    <div class="score-display" id="final-score">10 / 100 Puncte</div>
+    <p id="score-details" style="color:#94a3b8; font-size:14px; margin-top:10px;"></p>
+  </div>
+
+</div>
+
+<script>
+  // Timer Script
+  let timeRemaining = 2700; // 45 minute
+  let timerInterval = null;
+  let isPaused = false;
+
+  function startTimer() {
+    timerInterval = setInterval(() => {
+      if (!isPaused && timeRemaining > 0) {
+        timeRemaining--;
+        updateTimerDisplay();
+      } else if (timeRemaining === 0) {
+        clearInterval(timerInterval);
+        alert("Timpul de 45 de minute a expirat!");
+        checkFullQuiz();
+      }
+    }, 1000);
+  }
+
+  function updateTimerDisplay() {
+    const mins = Math.floor(timeRemaining / 60);
+    const secs = timeRemaining % 60;
+    document.getElementById('timer').innerText = 
+      `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  function toggleTimer() {
+    isPaused = !isPaused;
+    document.getElementById('pause-btn').innerText = isPaused ? "Play" : "Pauză";
+  }
+
+  function resetTimer() {
