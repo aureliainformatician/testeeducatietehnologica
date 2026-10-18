@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TESTUL 3 - Țesături și Tricoturi (Galben Cald)</title>
+<!-- Librarie html2pdf pentru generare si descarcare PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+  :root {
+    --yellow-primary: #f57f17;
+    --yellow-dark: #e65100;
+    --yellow-light: #fff8e1;
+    --yellow-border: #ffe082;
+    --yellow-accent: #ffb300;
+    --dark-text: #4e2600;
+    --card-bg: #ffffff;
+    --page-bg: #fffdf5;
+    --accent-red: #d32f2f;
+    --accent-green: #2e7d32;
+  }
+
+  * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+  body { background: var(--page-bg); color: #374151; margin: 0; padding: 20px; }
+  .quiz-container { max-width: 900px; margin: 0 auto; background: var(--card-bg); padding: 30px; border-radius: 12px; border: 2px solid var(--yellow-border); box-shadow: 0 4px 20px rgba(245, 127, 23, 0.12); }
+
+  h1 { text-align: center; color: var(--yellow-primary); margin-bottom: 5px; font-size: 26px; font-weight: 700; }
+  .subtitle { text-align: center; color: #f57f17; margin-bottom: 20px; font-size: 14px; font-weight: 600; }
+
+  /* Date Elev */
+  .student-info { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: var(--yellow-light); padding: 15px; border-radius: 8px; border: 1px solid var(--yellow-border); margin-bottom: 20px; }
+  .student-info label { font-size: 13px; color: var(--dark-text); font-weight: bold; }
+
+  /* Cronometru */
+  .timer-bar { display: flex; justify-content: space-between; align-items: center; background: #ffecb3; padding: 12px 20px; border-radius: 8px; border: 1px solid var(--yellow-border); margin-bottom: 25px; }
+  .timer-display { font-size: 24px; font-weight: bold; color: var(--dark-text); }
+  .timer-btn { background: #ffffff; border: 1px solid var(--yellow-primary); color: var(--yellow-primary); padding: 6px 14px; border-radius: 4px; cursor: pointer; transition: 0.2s; font-weight: 600; }
+  .timer-btn:hover { background: var(--yellow-primary); color: #ffffff; }
+
+  /* Sectiuni */
+  .section { margin-bottom: 30px; border: 1px solid var(--yellow-border); border-radius: 8px; padding: 20px; background: #fffdf8; }
+  .section-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--yellow-border); padding-bottom: 8px; margin-bottom: 18px; }
+  .section-title { font-size: 18px; font-weight: bold; color: var(--yellow-primary); text-transform: uppercase; letter-spacing: 0.5px; }
+  .section-points { background: var(--yellow-light); border: 1px solid var(--yellow-border); color: var(--dark-text); font-size: 13px; padding: 4px 10px; border-radius: 12px; font-weight: bold; }
+
+  /* Intrebari */
+  .question { margin-bottom: 20px; background: #ffffff; padding: 16px; border-radius: 8px; border-left: 4px solid var(--yellow-accent); border-top: 1px solid #fff9e6; border-right: 1px solid #fff9e6; border-bottom: 1px solid #fff9e6; position: relative; }
+  .q-title { font-weight: 600; margin: 0 0 10px 0; color: #e65100; display: flex; justify-content: space-between; font-size: 15px; }
+  .q-points { color: var(--yellow-primary); font-size: 13px; font-weight: bold; }
+
+  /* Optiuni si Campuri Text */
+  .options label { display: block; margin: 8px 0; cursor: pointer; font-size: 14px; color: #374151; }
+  .options input[type="radio"] { accent-color: var(--yellow-primary); margin-right: 8px; }
+  
+  input[type="text"], textarea, select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--yellow-border); background: #ffffff; color: #1f2937; margin-top: 8px; font-size: 14px; }
+  textarea { resize: vertical; min-height: 60px; }
+  input[type="text"]:focus, textarea:focus, select:focus { outline: none; border-color: var(--yellow-primary); box-shadow: 0 0 5px rgba(245, 127, 23, 0.3); }
+
+  /* Butoane Actiune Item */
+  .item-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .btn-item { background: var(--yellow-light); border: 1px solid var(--yellow-border); color: var(--dark-text); padding: 5px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; transition: 0.2s; font-weight: 600; }
+  .btn-item:hover { background: var(--yellow-primary); color: #ffffff; }
+
+  /* Feedback, Indicii si Solutii */
+  .hint-box, .answer-box { display: none; margin-top: 10px; padding: 10px; border-radius: 6px; font-size: 13px; line-height: 1.4; }
+  .hint-box { background: #fffde7; border: 1px solid #ffe082; color: #f57f17; }
+  .answer-box { background: #e8f5e9; border: 1px solid #a5d6a7; color: #1b5e20; }
+  .feedback { margin-top: 8px; font-weight: bold; font-size: 13px; display: none; }
+  .feedback.correct { color: #2e7d32; }
+  .feedback.incorrect { color: var(--accent-red); }
+
+  /* Tabel Asociere */
+  .matching-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  .matching-table th, .matching-table td { padding: 10px; border: 1px solid var(--yellow-border); text-align: left; font-size: 14px; }
+  .matching-table th { background: var(--yellow-light); color: var(--dark-text); }
+
+  /* Butoane Principale */
+  .main-actions { text-align: center; margin-top: 30px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+  .btn-main { background: var(--yellow-primary); color: #ffffff; border: none; padding: 14px 24px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: 0.2s; text-transform: uppercase; box-shadow: 0 2px 8px rgba(245, 127, 23, 0.25); }
+  .btn-main:hover { background: #e65100; transform: translateY(-1px); }
+  .btn-grade { background: #ffb300; color: #374151; }
+  .btn-grade:hover { background: #ffa000; color: #ffffff; }
+  .btn-pdf { background: #fb8c00; color: #ffffff; }
+  .btn-pdf:hover { background: #e65100; }
+  .btn-sec { background: transparent; border: 1px solid var(--yellow-primary); color: var(--yellow-primary); box-shadow: none; }
+  .btn-sec:hover { background: var(--yellow-light); }
+
+  /* Caseta Rezultat */
+  .result-box { display: none; background: var(--yellow-light); border: 2px solid var(--yellow-primary); padding: 25px; border-radius: 8px; text-align: center; margin-top: 30px; }
+  .score-display { font-size: 32px; font-weight: bold; color: var(--yellow-primary); margin: 10px 0; }
+  .grade-badge { font-size: 26px; font-weight: bold; color: #e65100; margin-top: 5px; }
+
+  /* Sectiune Semnatura Profesor */
+  .teacher-section { margin-top: 35px; background: #fffdf8; border: 1px solid var(--yellow-border); padding: 20px; border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .teacher-box { border: 1px dashed var(--yellow-border); padding: 12px; border-radius: 6px; text-align: center; background: #ffffff; }
+  .teacher-box label { font-size: 13px; color: var(--dark-text); font-weight: bold; display: block; margin-bottom: 8px; }
+  .signature-line { margin-top: 40px; border-top: 1px solid #ffe082; font-size: 12px; color: #6b7280; padding-top: 5px; }
+</style>
+</head>
+<body>
+
+<div class="quiz-container" id="pdf-content">
+  <h1>TESTUL 3 (Etapa Locală)</h1>
+  <p class="subtitle">Lecția 3: Țesături și tricoturi. Materiale textile de viitor</p>
+
+  <!-- Date Elev -->
+  <div class="student-info">
+    <div>
+      <label>Nume și Prenume Elev:</label>
+      <input type="text" id="student-name" placeholder="Introduceți numele complet...">
+    </div>
+    <div>
+      <label>Clasa / Școala:</label>
+      <input type="text" id="student-class" placeholder="Ex: Clasa a VI-a A...">
+    </div>
+  </div>
+
+  <!-- Cronometru -->
+  <div class="timer-bar" data-html2canvas-ignore="true">
+    <div>
+      <span style="color:var(--dark-text); font-size: 14px; font-weight:600;">Timp Examen: </span>
+      <span class="timer-display" id="timer">45:00</span>
+    </div>
+    <div>
+      <button class="timer-btn" id="pause-btn" onclick="toggleTimer()">Pauză</button>
+      <button class="timer-btn" onclick="resetTimer()">Reset Timp</button>
+    </div>
+  </div>
+
+  <!-- SUBIECTUL I -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">SUBIECTUL I</span>
+      <span class="section-points">30 Puncte</span>
+    </div>
+
+    <!-- I.1 Grila (10p) -->
+    <p style="color: var(--yellow-primary); font-weight: bold; margin-bottom: 12px;">1. Alegeți răspunsul corect (10p - 2p/item):</p>
+    
+    <div class="question" id="q-i1a">
+      <div class="q-title"><span>a) Sistemul transversal de fire folosit la obținerea țesăturilor se numește:</span> <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i1a" value="A"> A. urzeală</label>
+        <label><input type="radio" name="i1a" value="B"> B. bătătură</label>
+        <label><input type="radio" name="i1a" value="C"> C. fir de rețea</label>
+        <label><input type="radio" name="i1a" value="D"> D. buclă</label>
+      </div>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkRadio('i1a', 'B', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('hint-i1a')">Indicație</button>
+        <button class="btn-item" onclick="toggle('ans-i1a')">Vezi Răspuns</button>
+      </div>
+      <div id="hint-i1a" class="hint-box">Urzeala este sistemul longitudinal, iar cel transversal are alt nume.</div>
+      <div id="ans-i1a" class="answer-box">Răspuns corect: B (bătătură)</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-i1b">
+      <div class="q-title"><span>b) Materialele textile obținute prin buclarea succesivă sau simultană a unui fir se numesc:</span> <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i1b" value="A"> A. țesături</label>
+        <label><input type="radio" name="i1b" value="B"> B. tricoturi</label>
+        <label><input type="radio" name="i1b" value="C"> C. nețesute</label>
+        <label><input type="radio" name="i1b" value="D"> D. împâslituri</label>
+      </div>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkRadio('i1b', 'B', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('hint-i1b')">Indicație</button>
+        <button class="btn-item" onclick="toggle('ans-i1b')">Vezi Răspuns</button>
+      </div>
+      <div id="hint-i1b" class="hint-box">Se pot realiza manual cu andrele sau pe mașini speciale.</div>
+      <div id="ans-i1b" class="answer-box">Răspuns corect: B (tricoturi)</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-i1c">
+      <div class="q-title"><span>c) Masa țesăturii pe unitatea de suprafață se exprimă în:</span> <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i1c" value="A"> A. kg/m³</label>
+        <label><input type="radio" name="i1c" value="B"> B. grame pe metru pătrat (g/m²)</label>
+        <label><input type="radio" name="i1c" value="C"> C. mm</label>
+        <label><input type="radio" name="i1c" value="D"> D. tex</label>
+      </div>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkRadio('i1c', 'B', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('hint-i1c')">Indicație</button>
+        <button class="btn-item" onclick="toggle('ans-i1c')">Vezi Răspuns</button>
+      </div>
+      <div id="hint-i1c" class="hint-box">Consultați secțiunea "Proprietățile țesăturilor" de la pagina 14.</div>
+      <div id="ans-i1c" class="answer-box">Răspuns corect: B (grame pe metru pătrat - g/m²)</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-i1d">
+      <div class="q-title"><span>d) Țesăturile din lână și tip lână se utilizează în principal pentru:</span> <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i1d" value="A"> A. lenjerie intimă</label>
+        <label><input type="radio" name="i1d" value="B"> B. stofe pentru costume, paltoane, pardesie</label>
+        <label><input type="radio" name="i1d" value="C"> C. prosoape de baie</label>
+        <label><input type="radio" name="i1d" value="D"> D. fețe de masă subțiri</label>
+      </div>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkRadio('i1d', 'B', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('hint-i1d')">Indicație</button>
+        <button class="btn-item" onclick="toggle('ans-i1d')">Vezi Răspuns</button>
+      </div>
+      <div id="hint-i1d" class="hint-box">Sunt articole groase care oferă izolație termică.</div>
+      <div id="ans-i1d" class="answer-box">Răspuns corect: B (stofe pentru costume, paltoane, pardesie)</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-i1e">
+      <div class="q-title"><span>e) Capacitatea țesăturilor de a fi traversate de aer se numește:</span> <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i1e" value="A"> A. flexibilitate</label>
+        <label><input type="radio" name="i1e" value="B"> B. tușeu</label>
+        <label><input type="radio" name="i1e" value="C"> C. permeabilitate la aer</label>
+        <label><input type="radio" name="i1e" value="D"> D. rezistență la șifonare</label>
+      </div>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkRadio('i1e', 'C', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('hint-i1e')">Indicație</button>
+        <button class="btn-item" onclick="toggle('ans-i1e')">Vezi Răspuns</button>
+      </div>
+      <div id="hint-i1e" class="hint-box">Numele proprietății conține cuvântul "aer".</div>
+      <div id="ans-i1e" class="answer-box">Răspuns corect: C (permeabilitate la aer)</div>
+      <div class="feedback"></div>
+    </div>
+
+    <!-- I.2 A/F (10p) -->
+    <p style="color: var(--yellow-primary); font-weight: bold; margin-top:25px; margin-bottom:12px;">2. Precizați valoarea de adevăr (Adevărat / Fals) (10p - 2p/item):</p>
+
+    <div class="question" id="q-i2a">
+      <div class="q-title"><span>a) Sistemul longitudinal de fire al unei țesături se numește urzeală.</span> <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i2a" value="A"> Adevărat</label>
+        <label><input type="radio" name="i2a" value="F"> Fals</label>
+      </div>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkRadio('i2a', 'A', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-i2a')">Vezi Răspuns</button>
+      </div>
+      <div id="ans-i2a" class="answer-box">Răspuns corect: Adevărat (Pagina 14 din manual).</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-i2b">
+      <div class="q-title"><span>b) Tricoturile pot fi obținute doar prin procedee industriale pe mașini de tricotat.</span> <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i2b" value="A"> Adevărat</label>
+        <label><input type="radio" name="i2b" value="F"> Fals</label>
+      </div>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkRadio('i2b', 'F', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-i2b')">Vezi Răspuns</button>
+      </div>
+      <div id="ans-i2b" class="answer-box">Răspuns corect: Fals (Se pot realiza și manual, cu andrele - Fig. 14).</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-i2c">
+      <div class="q-title"><span>c) Grosimea țesăturii se măsoară în milimetri și depinde de finețea firelor folosite.</span> <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i2c" value="A"> Adevărat</label>
+        <label><input type="radio" name="i2c" value="F"> Fals</label>
+      </div>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkRadio('i2c', 'A', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-i2c')">Vezi Răspuns</button>
+      </div>
+      <div id="ans-i2c" class="answer-box">Răspuns corect: Adevărat.</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-i2d">
+      <div class="q-title"><span>d) Flexibilitatea reflectă capacitatea țesăturii de a se opune formării faldurilor.</span> <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i2d" value="A"> Adevărat</label>
+        <label><input type="radio" name="i2d" value="F"> Fals</label>
+      </div>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkRadio('i2d', 'F', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-i2d')">Vezi Răspuns</button>
+      </div>
+      <div id="ans-i2d" class="answer-box">Răspuns corect: Fals (Flexibilitatea reflectă capacitatea țesăturii de a FORMA falduri).</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-i2e">
+      <div class="q-title"><span>e) Țesăturile din mătase și tip mătase sunt utilizate pentru bluze, căptușeli și draperii.</span> <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i2e" value="A"> Adevărat</label>
+        <label><input type="radio" name="i2e" value="F"> Fals</label>
+      </div>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkRadio('i2e', 'A', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-i2e')">Vezi Răspuns</button>
+      </div>
+      <div id="ans-i2e" class="answer-box">Răspuns corect: Adevărat (Tabelul de la pagina 14).</div>
+      <div class="feedback"></div>
+    </div>
+
+    <!-- I.3 Asociere (10p) -->
+    <p style="color: var(--yellow-primary); font-weight: bold; margin-top:25px; margin-bottom:12px;">3. Asociați tipul de țesătură din Coloana A cu domeniul de utilizare din Coloana B (10p - 2p/pereche):</p>
+    <div class="question" id="q-i3">
+      <table class="matching-table">
+        <thead>
+          <tr>
+            <th>Coloana A (Tipul de fire/țesătură)</th>
+            <th>Alte domenii de utilizare (Coloana B)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1. Bumbac și tip bumbac</td>
+            <td>
+              <select id="m1">
+                <option value="">-- Selectează --</option>
+                <option value="A">A. Draperii, cuverturi</option>
+                <option value="B">B. Prosoape, huse pentru mobilă</option>
+                <option value="C">C. Covoare, mochete, pături</option>
+                <option value="D">D. Lenjerii, fețe de masă, stofe de mobilă</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>2. Lână și tip lână</td>
+            <td>
+              <select id="m2">
+                <option value="">-- Selectează --</option>
+                <option value="A">A. Draperii, cuverturi</option>
+                <option value="B">B. Prosoape, huse pentru mobilă</option>
+                <option value="C">C. Covoare, mochete, pături</option>
+                <option value="D">D. Lenjerii, fețe de masă, stofe de mobilă</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>3. În, cânepă și tip in/cânepă</td>
+            <td>
+              <select id="m3">
+                <option value="">-- Selectează --</option>
+                <option value="A">A. Draperii, cuverturi</option>
+                <option value="B">B. Prosoape, huse pentru mobilă</option>
+                <option value="C">C. Covoare, mochete, pături</option>
+                <option value="D">D. Lenjerii, fețe de masă, stofe de mobilă</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>4. Mătase și tip mătase</td>
+            <td>
+              <select id="m4">
+                <option value="">-- Selectează --</option>
+                <option value="A">A. Draperii, cuverturi</option>
+                <option value="B">B. Prosoape, huse pentru mobilă</option>
+                <option value="C">C. Covoare, mochete, pături</option>
+                <option value="D">D. Lenjerii, fețe de masă, stofe de mobilă</option>
+              </select>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkMatching()">Verifică Asocierea</button>
+        <button class="btn-item" onclick="toggle('ans-i3')">Vezi Răspunsuri</button>
+      </div>
+      <div id="ans-i3" class="answer-box">1-D, 2-C, 3-B, 4-A</div>
+      <div id="fb-i3" class="feedback"></div>
+    </div>
+  </div>
+
+  <!-- SUBIECTUL II -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">SUBIECTUL II</span>
+      <span class="section-points">30 Puncte</span>
+    </div>
+
+    <!-- II.1 Completare spații (15p) -->
+    <p style="color: var(--yellow-primary); font-weight: bold; margin-bottom: 12px;">1. Completați spațiile libere privind proprietățile țesăturilor (15p - 5p/termen - Răspuns Deschis):</p>
+    
+    <div class="question" id="q-ii1a">
+      <div class="q-title"><span>a) Percepția la pipăire a țesăturilor pentru a le stabili gradul de finețe se numește:</span> <span class="q-points">(5p)</span></div>
+      <input type="text" id="open-ii1a" placeholder="Escriu termenul (ex. tușeu)...">
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkText('open-ii1a', ['tușeu', 'tuseu', 'tușeul', 'tuseul'], 5)">Verifică</button>
+        <button class="btn-item" onclick="toggle('hint-ii1a')">Indicație</button>
+        <button class="btn-item" onclick="toggle('ans-ii1a')">Vezi Răspuns</button>
+      </div>
+      <div id="hint-ii1a" class="hint-box">Termen ce descrie senzația de moliciune sau asprime la pipăit.</div>
+      <div id="ans-ii1a" class="answer-box">Răspuns corect: Tușeul.</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-ii1b">
+      <div class="q-title"><span>b) Capacitatea țesăturii de a rezista la procesul de întreținere și purtare fără a crea cute permanente reprezintă rezistența la:</span> <span class="q-points">(5p)</span></div>
+      <input type="text" id="open-ii1b" placeholder="Escriu termenul...">
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkText('open-ii1b', ['șifonare', 'sifonare', 'șifonarea', 'sifonarea'], 5)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-ii1b')">Vezi Răspuns</button>
+      </div>
+      <div id="ans-ii1b" class="answer-box">Răspuns corect: Șifonare.</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-ii1c">
+      <div class="q-title"><span>c) Elementul structural de bază al tricoturilor obținut prin înlănțuirea buclelor se numește:</span> <span class="q-points">(5p)</span></div>
+      <input type="text" id="open-ii1c" placeholder="Escriu termenul...">
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkText('open-ii1c', ['ochi', 'ochiuri', 'ochiul'], 5)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-ii1c')">Vezi Răspuns</button>
+      </div>
+      <div id="ans-ii1c" class="answer-box">Răspuns corect: Ochi (sau ochiuri).</div>
+      <div class="feedback"></div>
+    </div>
+
+    <!-- II.2 Cerințe de comparare (15p) -->
+    <p style="color: var(--yellow-primary); font-weight: bold; margin-top: 25px; margin-bottom: 12px;">2. Aplicație practică privind țesăturile și tricoturile (15p - Răspuns Deschis):</p>
+
+    <div class="question" id="q-ii2a">
+      <div class="q-title"><span>a) Explicați diferența dintre modul de obținere al unei țesături și al unui tricot:</span> <span class="q-points">(5p)</span></div>
+      <textarea id="open-ii2a" placeholder="Explicați încrucișarea a două sisteme (urzeală/bătătură) vs. buclarea firului în ochiuri..."></textarea>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkText('open-ii2a', ['încrucișare', 'incrucisare', 'urzeal', 'bătătur', 'batatur', 'buclar', 'ochi'], 5)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-ii2a')">Vezi Răspuns Barem</button>
+      </div>
+      <div id="ans-ii2a" class="answer-box">Țesătura se obține prin încrucișarea a două sisteme de fire (urzeală și bătătură), iar tricotul prin buclarea succesivă/simultană a unui fir în ochiuri.</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-ii2b">
+      <div class="q-title"><span>b) Precizați două avantaje ale îmbrăcămintei din tricot comparativ cu o țesătură fixă:</span> <span class="q-points">(10p)</span></div>
+      <input type="text" id="open-ii2b-adv1" placeholder="Avantaj 1 (ex. elasticitate mare / mulare pe corp)..." style="margin-bottom:8px;">
+      <input type="text" id="open-ii2b-adv2" placeholder="Avantaj 2 (ex. nu se șifonează ușor / confort sporit)..." style="margin-bottom:8px;">
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkDiffs()">Verifică Avantajele</button>
+        <button class="btn-item" onclick="toggle('ans-ii2b')">Vezi Răspuns Barem</button>
+      </div>
+      <div id="ans-ii2b" class="answer-box">
+        <strong>Avantaje tricot:</strong> Elasticitate și flexibilitate ridicată (se mulează bine pe corp), confort termic sporit, grad scăzut de șifonare.
+      </div>
+      <div id="fb-ii2b" class="feedback"></div>
+    </div>
+  </div>
+
+  <!-- SUBIECTUL III -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">SUBIECTUL III - Analiză și Proiectare Produs</span>
+      <span class="section-points">30 Puncte</span>
+    </div>
+
+    <p style="color: var(--yellow-primary); font-weight: bold; margin-bottom: 12px;">Analizați un produs vestimentar din tricot sau țesătură (ex. pulover de iarnă sau rochie de vară):</p>
+
+    <div class="question" id="q-iii1">
+      <div class="q-title"><span>1. Propuneți un articol vestimentar, menționând structura sa (țesătură sau tricot) și tipul de fire recomandat:</span> <span class="q-points">(10p)</span></div>
+      <textarea id="open-iii1" placeholder="Ex: Pulover din tricot de lână / Rochie de vară din țesătură de bumbac sau in..."></textarea>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkText('open-iii1', ['tricot', 'țesătur', 'tesatur', 'lână', 'lana', 'bumbac', 'mătase', 'matase', 'in'], 10)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-iii1')">Vezi Răspuns Barem</button>
+      </div>
+      <div id="ans-iii1" class="answer-box">Propunere validă: un produs clar definit (ex: palton din țesătură de lână sau tricou din tricot de bumbac) menționând structura și compoziția.</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-iii2">
+      <div class="q-title"><span>2. Argumentați alegerea materialului pe baza a cel puțin două proprietăți ale țesăturilor/tricoturilor (tușeu, permeabilitate, flexibilitate, etc.):</span> <span class="q-points">(10p)</span></div>
+      <textarea id="open-iii2" placeholder="Explicați alegerea (ex: lână pentru izolație termică și tușeu moale / bumbac pentru permeabilitate la aer și higroscopicitate)..."></textarea>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkText('open-iii2', ['tușeu', 'tuseu', 'permeabil', 'flexibil', 'grosim', 'șifonar', 'sifonar', 'cald', 'izol'], 10)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-iii2')">Vezi Răspuns Barem</button>
+      </div>
+      <div id="ans-iii2" class="answer-box">Argumentare corectă ce corelează proprietățile fizico-mecanice (tușeu, grosime, flexibilitate, permeabilitate) cu destinația produsului.</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-iii3">
+      <div class="q-title"><span>3. Specificați procedeul de obținere recomandat (tricotare manuală/mecanică sau țesere la război/industrială):</span> <span class="q-points">(10p)</span></div>
+      <input type="text" id="open-iii3" placeholder="Escriu procedeul de fabricare...">
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkText('open-iii3', ['manual', 'mecanic', 'andrele', 'mașin', 'masin', 'război', 'razboi', 'filare'], 10)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-iii3')">Vezi Răspuns Barem</button>
+      </div>
+      <div id="ans-iii3" class="answer-box">Tricotare manuală (andrele) / tricotare mecanică sau țesere la războiul de țesut / mașini industriale de țesut.</div>
+      <div class="feedback"></div>
+    </div>
+  </div>
+
+  <!-- REZULTAT EVALUARE -->
+  <div class="result-box" id="result-box">
+    <h2 style="color:var(--yellow-primary); margin-top:0;">Rezultatul Evaluării Generale</h2>
+    <div class="score-display" id="final-score">10 / 100 Puncte</div>
+    <div class="grade-badge" id="final-grade">NOTA: 1.00</div>
+    <p id="score-details" style="color:#6b7280; font-size:14px; margin-top:10px;"></p>
+  </div>
+
+  <!-- SECTIUNE EVALUARE CADRU DIDACTIC & SEMNATURA -->
+  <div class="teacher-section">
+    <div class="teacher-box">
+      <label>Nota Finală Acordată de Profesor:</label>
+      <input type="text" id="teacher-grade-input" placeholder="Ex: 9.50" style="text-align: center; font-weight: bold; font-size: 16px;">
+      <div class="signature-line" style="margin-top: 25px;">Semnătură Evaluator / Profesor</div>
+    </div>
+    <div class="teacher-box">
+      <label>Observații / Aprecieri Profesor:</label>
+      <textarea placeholder="Rezultat bun, cunoștințe temeinice privind țesăturile..." style="height: 60px; font-size: 12px;"></textarea>
+      <div class="signature-line" style="margin-top: 10px;">Data Evaluării</div>
+    </div>
+  </div>
+
+  <!-- BUTOANE PRINCIPALE -->
+  <div class="main-actions" data-html2canvas-ignore="true">
+    <button class="btn-main" onclick="checkFullQuiz()">Verifică Punctajul</button>
+    <button class="btn-main btn-grade" onclick="calculateGrade()">Calculează Nota Finală</button>
+    <button class="btn-main btn-pdf" onclick="downloadPDF()">Descarcă Lucrarea PDF</button>
+    <button class="btn-main btn-sec" onclick="returnToTest()">Revin la Rezolvare Test</button>
+  </div>
+
+</div>
+
+<script>
+  // Script Cronometru
+  let timeRemaining = 2700; // 45 minute
+  let timerInterval = null;
+  let isPaused = false;
+
+  function startTimer() {
+    timerInterval = setInterval(() => {
+      if (!isPaused && timeRemaining > 0) {
+        timeRemaining--;
+        updateTimerDisplay();
+      } else if (timeRemaining === 0) {
+        clearInterval(timerInterval);
+        alert("Timpul de 45 de minute a expirat! Se va calcula nota automa.");
+        calculateGrade();
+      }
+    }, 1000);
+  }
+
+  function updateTimerDisplay() {
+    const mins = Math.floor(timeRemaining / 60);
+    const secs = timeRemaining % 60;
+    document.getElementById('timer').innerText = 
+      `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  function toggleTimer() {
+    isPaused = !isPaused;
+    document.getElementById('pause-btn').innerText = isPaused ? "Play" : "Pauză";
+  }
+
+  function resetTimer() {
+    timeRemaining = 2700;
+    updateTimerDisplay();
+  }
+
+  function toggle(id) {
+    const el = document.getElementById(id);
+    el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+  }
+
+  // Verificare Item Grila / AF
+  function checkRadio(name, correctVal, points) {
+    const selected = document.querySelector(`input[name="${name}"]:checked`);
+    const qBox = document.getElementById(`q-${name}`);
+    const fb = qBox.querySelector('.feedback');
+    fb.style.display = 'block';
+
+    if (selected && selected.value === correctVal) {
+      fb.className = 'feedback correct';
+      fb.innerText = `Corect! (+${points}p)`;
+      return points;
+    } else {
+      fb.className = 'feedback incorrect';
+      fb.innerText = `Incorect (0p).`;
+      return 0;
+    }
+  }
+
+  // Verificare Text Deschis
+  function checkText(id, keywords, points) {
+    const val = document.getElementById(id).value.trim().toLowerCase();
+    const qBox = document.getElementById(id).closest('.question');
+    const fb = qBox.querySelector('.feedback');
+    fb.style.display = 'block';
+
+    const ok = keywords.some(kw => val.includes(kw));
+    if (ok) {
+      fb.className = 'feedback correct';
+      fb.innerText = `Corect / Validat! (+${points}p)`;
+      return points;
+    } else {
+      fb.className = 'feedback incorrect';
+      fb.innerText = `Răspuns incomplet sau incorect (0p).`;
+      return 0;
+    }
+  }
+
+  // Verificare Asociere (10p)
+  function checkMatching() {
+    const m1 = document.getElementById('m1').value;
+    const m2 = document.getElementById('m2').value;
+    const m3 = document.getElementById('m3').value;
+    const m4 = document.getElementById('m4').value;
+
+    let pts = 0;
+    if (m1 === 'D') pts += 2.5;
+    if (m2 === 'C') pts += 2.5;
+    if (m3 === 'B') pts += 2.5;
+    if (m4 === 'A') pts += 2.5;
+
+    const fb = document.getElementById('fb-i3');
+    fb.style.display = 'block';
+    if (pts === 10) {
+      fb.className = 'feedback correct';
+      fb.innerText = `Toate cele 4 asocieri sunt corecte! (+10p)`;
+    } else {
+      fb.className = 'feedback incorrect';
+      fb.innerText = `Punctaj obținut: ${pts}/10p.`;
+    }
+    return pts;
+  }
+
+  // Verificare Avantaje Tricot (10p)
+  function checkDiffs() {
+    const a1 = document.getElementById('open-ii2b-adv1').value.toLowerCase();
+    const a2 = document.getElementById('open-ii2b-adv2').value.toLowerCase();
+
+    let pts = 0;
+    if (a1.includes('elastic') || a1.includes('mulare') || a1.includes('corp') || a1.includes('flexibil') || a1.includes('confort')) pts += 5;
+    if (a2.includes('șifon') || a2.includes('sifon') || a2.includes('confort') || a2.includes('moale') || a2.includes('cald')) pts += 5;
+
+    const fb = document.getElementById('fb-ii2b');
+    fb.style.display = 'block';
+    if (pts === 10) {
+      fb.className = 'feedback correct';
+      fb.innerText = `Răspuns validat! Obținut: 10/10p.`;
+    } else if (pts > 0) {
+      fb.className = 'feedback correct';
+      fb.innerText = `Punctaj obținut: ${pts}/10p.`;
+    } else {
+      fb.className = 'feedback incorrect';
+      fb.innerText = `Punctaj obținut: 0/10p. Consultați baremul!`;
+    }
+    return pts;
+  }
+
+  // Calcul Punctaj Total (100 puncte)
+  function checkFullQuiz() {
+    let score = 10; // 10p din oficiu
+
+    // Subiectul I (30p)
+    score += checkRadio('i1a', 'B', 2);
+    score += checkRadio('i1b', 'B', 2);
+    score += checkRadio('i1c', 'B', 2);
+    score += checkRadio('i1d', 'B', 2);
+    score += checkRadio('i1e', 'C', 2);
+
+    score += checkRadio('i2a', 'A', 2);
+    score += checkRadio('i2b', 'F', 2);
+    score += checkRadio('i2c', 'A', 2);
+    score += checkRadio('i2d', 'F', 2);
+    score += checkRadio('i2e', 'A', 2);
+
+    score += checkMatching();
+
+    // Subiectul II (30p)
+    score += checkText('open-ii1a', ['tușeu', 'tuseu', 'tușeul', 'tuseul'], 5);
+    score += checkText('open-ii1b', ['șifonare', 'sifonare', 'șifonarea', 'sifonarea'], 5);
+    score += checkText('open-ii1c', ['ochi', 'ochiuri', 'ochiul'], 5);
+
+    score += checkText('open-ii2a', ['încrucișare', 'incrucisare', 'urzeal', 'bătătur', 'batatur', 'buclar', 'ochi'], 5);
+    score += checkDiffs();
+
+    // Subiectul III (30p)
+    score += checkText('open-iii1', ['tricot', 'țesătur', 'tesatur', 'lână', 'lana', 'bumbac', 'mătase', 'matase', 'in'], 10);
+    score += checkText('open-iii2', ['tușeu', 'tuseu', 'permeabil', 'flexibil', 'grosim', 'șifonar', 'sifonar', 'cald', 'izol'], 10);
+    score += checkText('open-iii3', ['manual', 'mecanic', 'andrele', 'mașin', 'masin', 'război', 'razboi', 'filare'], 10);
+
+    const box = document.getElementById('result-box');
+    box.style.display = 'block';
+    document.getElementById('final-score').innerText = `${score} / 100 Puncte`;
+    document.getElementById('score-details').innerText = `Punctaj defalcat: Subiectul I (30p) + Subiectul II (30p) + Subiectul III (30p) + Din oficiu (10p)`;
+    
+    return score;
+  }
+
+  // Calculare si Afisare Nota Finala (1-10)
+  function calculateGrade() {
+    const score = checkFullQuiz();
+    const grade = (score / 10).toFixed(2);
+
+    document.getElementById('final-grade').innerText = `NOTA FINALĂ: ${grade}`;
+    document.getElementById('teacher-grade-input').value = grade;
+
+    const box = document.getElementById('result-box');
+    box.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function returnToTest() {
+    document.getElementById('result-box').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Generare si Descarcare PDF
+  function downloadPDF() {
+    calculateGrade(); // Calculeaza punctajul si nota inainte de export
+    
+    const studentName = document.getElementById('student-name').value.trim() || 'Elev_Anonim';
+    const element = document.getElementById('pdf-content');
+
+    const opt = {
+      margin:       8,
+      filename:     `Test_Tesaturi_Tricoturi_${studentName.replace(/\s+/g, '_')}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(element).save();
+  }
+
+  window.onload = startTimer;
+</script>
+</body>
+</html>

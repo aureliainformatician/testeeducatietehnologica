@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TESTUL 4 - Procese Tehnologice, SSM și Ergonomie (Albastru Deschis)</title>
+<!-- Librarie html2pdf pentru generare si descarcare PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+  :root {
+    --blue-primary: #0288d1;
+    --blue-dark: #01579b;
+    --blue-light: #e1f5fe;
+    --blue-border: #81d4fa;
+    --blue-accent: #03a9f4;
+    --dark-text: #002f6c;
+    --card-bg: #ffffff;
+    --page-bg: #f4fafd;
+    --accent-red: #d32f2f;
+    --accent-green: #2e7d32;
+    --accent-gold: #fbc02d;
+  }
+
+  * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+  body { background: var(--page-bg); color: #374151; margin: 0; padding: 20px; }
+  .quiz-container { max-width: 900px; margin: 0 auto; background: var(--card-bg); padding: 30px; border-radius: 12px; border: 2px solid var(--blue-border); box-shadow: 0 4px 20px rgba(2, 136, 209, 0.12); }
+
+  h1 { text-align: center; color: var(--blue-primary); margin-bottom: 5px; font-size: 25px; font-weight: 700; }
+  .subtitle { text-align: center; color: #0288d1; margin-bottom: 20px; font-size: 14px; font-weight: 600; }
+
+  /* Date Elev */
+  .student-info { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: var(--blue-light); padding: 15px; border-radius: 8px; border: 1px solid var(--blue-border); margin-bottom: 20px; }
+  .student-info label { font-size: 13px; color: var(--dark-text); font-weight: bold; }
+
+  /* Cronometru */
+  .timer-bar { display: flex; justify-content: space-between; align-items: center; background: #b3e5fc; padding: 12px 20px; border-radius: 8px; border: 1px solid var(--blue-border); margin-bottom: 25px; }
+  .timer-display { font-size: 24px; font-weight: bold; color: var(--dark-text); }
+  .timer-btn { background: #ffffff; border: 1px solid var(--blue-primary); color: var(--blue-primary); padding: 6px 14px; border-radius: 4px; cursor: pointer; transition: 0.2s; font-weight: 600; }
+  .timer-btn:hover { background: var(--blue-primary); color: #ffffff; }
+
+  /* Sectiuni */
+  .section { margin-bottom: 30px; border: 1px solid var(--blue-border); border-radius: 8px; padding: 20px; background: #fafdfe; }
+  .section-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--blue-border); padding-bottom: 8px; margin-bottom: 18px; }
+  .section-title { font-size: 18px; font-weight: bold; color: var(--blue-primary); text-transform: uppercase; letter-spacing: 0.5px; }
+  .section-points { background: var(--blue-light); border: 1px solid var(--blue-border); color: var(--dark-text); font-size: 13px; padding: 4px 10px; border-radius: 12px; font-weight: bold; }
+
+  /* Intrebari */
+  .question { margin-bottom: 20px; background: #ffffff; padding: 16px; border-radius: 8px; border-left: 4px solid var(--blue-accent); border-top: 1px solid #f0f8ff; border-right: 1px solid #f0f8ff; border-bottom: 1px solid #f0f8ff; position: relative; }
+  .q-title { font-weight: 600; margin: 0 0 10px 0; color: #01579b; display: flex; justify-content: space-between; font-size: 15px; }
+  .q-points { color: var(--blue-primary); font-size: 13px; font-weight: bold; }
+
+  /* Optiuni si Campuri Text */
+  .options label { display: block; margin: 8px 0; cursor: pointer; font-size: 14px; color: #374151; }
+  .options input[type="radio"] { accent-color: var(--blue-primary); margin-right: 8px; }
+  
+  input[type="text"], textarea, select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--blue-border); background: #ffffff; color: #1f2937; margin-top: 8px; font-size: 14px; }
+  textarea { resize: vertical; min-height: 60px; }
+  input[type="text"]:focus, textarea:focus, select:focus { outline: none; border-color: var(--blue-primary); box-shadow: 0 0 5px rgba(2, 136, 209, 0.3); }
+
+  /* Butoane Actiune Item */
+  .item-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .btn-item { background: var(--blue-light); border: 1px solid var(--blue-border); color: var(--dark-text); padding: 5px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; transition: 0.2s; font-weight: 600; }
+  .btn-item:hover { background: var(--blue-primary); color: #ffffff; }
+
+  /* Feedback, Indicii si Solutii */
+  .hint-box, .answer-box { display: none; margin-top: 10px; padding: 10px; border-radius: 6px; font-size: 13px; line-height: 1.4; }
+  .hint-box { background: #fffde7; border: 1px solid #ffe082; color: #f57f17; }
+  .answer-box { background: #e8f5e9; border: 1px solid #a5d6a7; color: #1b5e20; }
+  .feedback { margin-top: 8px; font-weight: bold; font-size: 13px; display: none; }
+  .feedback.correct { color: #2e7d32; }
+  .feedback.incorrect { color: var(--accent-red); }
+
+  /* Tabel Asociere */
+  .matching-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  .matching-table th, .matching-table td { padding: 10px; border: 1px solid var(--blue-border); text-align: left; font-size: 14px; }
+  .matching-table th { background: var(--blue-light); color: var(--dark-text); }
+
+  /* Butoane Principale */
+  .main-actions { text-align: center; margin-top: 30px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+  .btn-main { background: var(--blue-primary); color: #ffffff; border: none; padding: 14px 24px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: 0.2s; text-transform: uppercase; box-shadow: 0 2px 8px rgba(2, 136, 209, 0.25); }
+  .btn-main:hover { background: #01579b; transform: translateY(-1px); }
+  .btn-grade { background: #0288d1; color: #ffffff; }
+  .btn-grade:hover { background: #01579b; }
+  .btn-pdf { background: #0288d1; color: #ffffff; }
+  .btn-pdf:hover { background: #005691; }
+  .btn-sec { background: transparent; border: 1px solid var(--blue-primary); color: var(--blue-primary); box-shadow: none; }
+  .btn-sec:hover { background: var(--blue-light); }
+
+  /* Caseta Rezultat */
+  .result-box { display: none; background: var(--blue-light); border: 2px solid var(--blue-primary); padding: 25px; border-radius: 8px; text-align: center; margin-top: 30px; }
+  .score-display { font-size: 32px; font-weight: bold; color: var(--blue-primary); margin: 10px 0; }
+  .grade-badge { font-size: 26px; font-weight: bold; color: #01579b; margin-top: 5px; }
+
+  /* Sectiune Semnatura Profesor */
+  .teacher-section { margin-top: 35px; background: #fafdfe; border: 1px solid var(--blue-border); padding: 20px; border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .teacher-box { border: 1px dashed var(--blue-border); padding: 12px; border-radius: 6px; text-align: center; background: #ffffff; }
+  .teacher-box label { font-size: 13px; color: var(--dark-text); font-weight: bold; display: block; margin-bottom: 8px; }
+  .signature-line { margin-top: 40px; border-top: 1px solid #81d4fa; font-size: 12px; color: #6b7280; padding-top: 5px; }
+</style>
+</head>
+<body>
+
+<div class="quiz-container" id="pdf-content">
+  <h1>TESTUL 4 (Etapa Locală)</h1>
+  <p class="subtitle">Lecția 4: Operații tehnologice de pregătire, prelucrare, finisare. SSM și Ergonomie</p>
+
+  <!-- Date Elev -->
+  <div class="student-info">
+    <div>
+      <label>Nume și Prenume Elev:</label>
+      <input type="text" id="student-name" placeholder="Introduceți numele complet...">
+    </div>
+    <div>
+      <label>Clasa / Școala:</label>
+      <input type="text" id="student-class" placeholder="Ex: Clasa a VI-a A...">
+    </div>
+  </div>
+
+  <!-- Cronometru -->
+  <div class="timer-bar" data-html2canvas-ignore="true">
+    <div>
+      <span style="color:var(--dark-text); font-size: 14px; font-weight:600;">Timp Examen: </span>
+      <span class="timer-display" id="timer">45:00</span>
+    </div>
+    <div>
+      <button class="timer-btn" id="pause-btn" onclick="toggleTimer()">Pauză</button>
+      <button class="timer-btn" onclick="resetTimer()">Reset Timp</button>
+    </div>
+  </div>
+
+  <!-- SUBIECTUL I -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">SUBIECTUL I</span>
+      <span class="section-points">30 Puncte</span>
+    </div>
+
+    <!-- I.1 Grila (10p) -->
+    <p style="color: var(--blue-primary); font-weight: bold; margin-bottom: 12px;">1. Alegeți răspunsul corect (10p - 2p/item):</p>
+    
+    <div class="question" id="q-i1a">
+      <div class="q-title"><span>a) Căptușelile și întăriturile folosite la realizarea îmbrăcămintei sunt materiale:</span> <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i1a" value="A"> A. de bază</label>
+        <label><input type="radio" name="i1a" value="B"> B. secundare</label>
+        <label><input type="radio" name="i1a" value="C"> C. auxiliare</label>
+        <label><input type="radio" name="i1a" value="D"> D. nețesute sanitare</label>
+      </div>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkRadio('i1a', 'B', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('hint-i1a')">Indicație</button>
+        <button class="btn-item" onclick="toggle('ans-i1a')">Vezi Răspuns</button>
+      </div>
+      <div id="hint-i1a" class="hint-box">Sunt materialele care dublează detaliile și măresc rezistența (p. 16).</div>
+      <div id="ans-i1a" class="answer-box">Răspuns corect: B (materiale secundare)</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-i1b">
+      <div class="q-title"><span>b) Face parte din categoria detaliilor secundare ale unei cămăși / bluze (Fig. 22):</span> <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i1b" value="A"> A. fața produsului</label>
+        <label><input type="radio" name="i1b" value="C"> B. spatele produsului</label>
+        <label><input type="radio" name="i1b" value="C"> C. gulerul și manșeta</label>
+        <label><input type="radio" name="i1b" value="D"> D. mâneca</label>
+      </div>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkRadio('i1b', 'C', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('hint-i1b')">Indicație</button>
+        <button class="btn-item" onclick="toggle('ans-i1b')">Vezi Răspuns</button>
+      </div>
+      <div id="hint-i1b" class="hint-box">Detaliile secundare pot lipsi din structura fizică a unor articole fără a le distruge corpul principal.</div>
+      <div id="ans-i1b" class="answer-box">Răspuns corect: C (gulerul și manșeta)</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-i1c">
+      <div class="q-title"><span>c) Decuparea (tăierea) detaliilor după conturul trasat face parte din operațiile de:</span> <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i1c" value="A"> A. pregătire</label>
+        <label><input type="radio" name="i1c" value="B"> B. prelucrare (croire)</label>
+        <label><input type="radio" name="i1c" value="C"> C. finisare</label>
+        <label><input type="radio" name="i1c" value="D"> D. ambalare</label>
+      </div>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkRadio('i1c', 'B', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('hint-i1c')">Indicație</button>
+        <button class="btn-item" onclick="toggle('ans-i1c')">Vezi Răspuns</button>
+      </div>
+      <div id="hint-i1c" class="hint-box">Fac parte din prima etapă de prelucrare efectivă a materialului (p. 17).</div>
+      <div id="ans-i1c" class="answer-box">Răspuns corect: B (prelucrare - croirea)</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-i1d">
+      <div class="q-title"><span>d) Operatia de curățare de ațe, călcare finală, etichetare și ambalare face parte din:</span> <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i1d" value="A"> A. operații de pregătire</label>
+        <label><input type="radio" name="i1d" value="B"> B. operații de prelucrare</label>
+        <label><input type="radio" name="i1d" value="C"> C. operații de finisare</label>
+        <label><input type="radio" name="i1d" value="D"> D. proiectare</label>
+      </div>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkRadio('i1d', 'C', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('hint-i1d')">Indicație</button>
+        <button class="btn-item" onclick="toggle('ans-i1d')">Vezi Răspuns</button>
+      </div>
+      <div id="hint-i1d" class="hint-box">Sunt ultimele operații înainte ca produsul să fie oferit spre vânzare.</div>
+      <div id="ans-i1d" class="answer-box">Răspuns corect: C (operații de finisare)</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-i1e">
+      <div class="q-title"><span>e) Respectarea unei poziții corecte a corpului și executarea mișcărilor simetrice sunt măsuri:</span> <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i1e" value="A"> A. de finanțare</label>
+        <label><input type="radio" name="i1e" value="B"> B. ergonomice la locul de muncă (p. 18)</label>
+        <label><input type="radio" name="i1e" value="C"> C. de tăiere a tiparelor</label>
+        <label><input type="radio" name="i1e" value="D"> D. de tricotare mecanică</label>
+      </div>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkRadio('i1e', 'B', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('hint-i1e')">Indicație</button>
+        <button class="btn-item" onclick="toggle('ans-i1e')">Vezi Răspuns</button>
+      </div>
+      <div id="hint-i1e" class="hint-box">Au rolul de a reduce efortul depus de muncitor și de a preveni oboseala.</div>
+      <div id="ans-i1e" class="answer-box">Răspuns corect: B (ergonomice la locul de muncă)</div>
+      <div class="feedback"></div>
+    </div>
+
+    <!-- I.2 A/F (10p) -->
+    <p style="color: var(--blue-primary); font-weight: bold; margin-top:25px; margin-bottom:12px;">2. Precizați valoarea de adevăr (Adevărat / Fals) (10p - 2p/item):</p>
+
+    <div class="question" id="q-i2a">
+      <div class="q-title"><span>a) Tiparul reprezintă o construcție grafică realizată pe hârtie sau carton a detaliilor vestimentare.</span> <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i2a" value="A"> Adevărat</label>
+        <label><input type="radio" name="i2a" value="F"> Fals</label>
+      </div>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkRadio('i2a', 'A', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-i2a')">Vezi Răspuns</button>
+      </div>
+      <div id="ans-i2a" class="answer-box">Răspuns corect: Adevărat (Pagina 16 din manual).</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-i2b">
+      <div class="q-title"><span>b) Șablonarea (încadrarea) este operația prin care se așază tiparele pe material pentru consum minim.</span> <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i2b" value="A"> Adevărat</label>
+        <label><input type="radio" name="i2b" value="F"> Fals</label>
+      </div>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkRadio('i2b', 'A', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-i2b')">Vezi Răspuns</button>
+      </div>
+      <div id="ans-i2b" class="answer-box">Răspuns corect: Adevărat (Pagina 17, Fig. 25).</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-i2c">
+      <div class="q-title"><span>c) În cazul apariției unor defecțiuni la mașina de cusut, lucrul poate continua fără oprire.</span> <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i2c" value="A"> Adevărat</label>
+        <label><input type="radio" name="i2c" value="F"> Fals</label>
+      </div>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkRadio('i2c', 'F', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-i2c')">Vezi Răspuns</button>
+      </div>
+      <div id="ans-i2c" class="answer-box">Răspuns corect: Fals (Mașina trebuie oprită imediat conform normelor SSM, p. 17).</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-i2d">
+      <div class="q-title"><span>d) Ața de cusut, nasturii, fermoarele și cataramele sunt materiale auxiliare.</span> <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i2d" value="A"> Adevărat</label>
+        <label><input type="radio" name="i2d" value="F"> Fals</label>
+      </div>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkRadio('i2d', 'A', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-i2d')">Vezi Răspuns</button>
+      </div>
+      <div id="ans-i2d" class="answer-box">Răspuns corect: Adevărat.</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-i2e">
+      <div class="q-title"><span>e) Aglomerarea locului de muncă cu unelte neutilizate este recomandată în ergonomie.</span> <span class="q-points">(2p)</span></div>
+      <div class="options">
+        <label><input type="radio" name="i2e" value="A"> Adevărat</label>
+        <label><input type="radio" name="i2e" value="F"> Fals</label>
+      </div>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkRadio('i2e', 'F', 2)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-i2e')">Vezi Răspuns</button>
+      </div>
+      <div id="ans-i2e" class="answer-box">Răspuns corect: Fals (Este interzisă aglomerarea locului de muncă, p. 18).</div>
+      <div class="feedback"></div>
+    </div>
+
+    <!-- I.3 Asociere (10p) -->
+    <p style="color: var(--blue-primary); font-weight: bold; margin-top:25px; margin-bottom:12px;">3. Asociați operația tehnologică din Coloana A cu etapa corespunzătoare din Coloana B (10p - 2.5p/pereche):</p>
+    <div class="question" id="q-i3">
+      <table class="matching-table">
+        <thead>
+          <tr>
+            <th>Coloana A (Operație tehnologică)</th>
+            <th>Etapa procesului (Coloana B)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1. Proiectare tipar, șablonare, șpănuire</td>
+            <td>
+              <select id="m1">
+                <option value="">-- Selectează --</option>
+                <option value="A">A. Operații de finisare</option>
+                <option value="B">B. Măsuri de ergonomie</option>
+                <option value="C">C. Operații de pregătire</option>
+                <option value="D">D. Operații de prelucrare</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>2. Croirea și asamblarea prin coasere</td>
+            <td>
+              <select id="m2">
+                <option value="">-- Selectează --</option>
+                <option value="A">A. Operații de finisare</option>
+                <option value="B">B. Măsuri de ergonomie</option>
+                <option value="C">C. Operații de pregătire</option>
+                <option value="D">D. Operații de prelucrare</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>3. Călcarea finală, ambalarea, etichetarea</td>
+            <td>
+              <select id="m3">
+                <option value="">-- Selectează --</option>
+                <option value="A">A. Operații de finisare</option>
+                <option value="B">B. Măsuri de ergonomie</option>
+                <option value="C">C. Operații de pregătire</option>
+                <option value="D">D. Operații de prelucrare</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>4. Reglabilitatea scaunului și a mesei de lucru</td>
+            <td>
+              <select id="m4">
+                <option value="">-- Selectează --</option>
+                <option value="A">A. Operații de finisare</option>
+                <option value="B">B. Măsuri de ergonomie</option>
+                <option value="C">C. Operații de pregătire</option>
+                <option value="D">D. Operații de prelucrare</option>
+              </select>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkMatching()">Verifică Asocierea</button>
+        <button class="btn-item" onclick="toggle('ans-i3')">Vezi Răspunsuri</button>
+      </div>
+      <div id="ans-i3" class="answer-box">1-C, 2-D, 3-A, 4-B</div>
+      <div id="fb-i3" class="feedback"></div>
+    </div>
+  </div>
+
+  <!-- SUBIECTUL II -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-title">SUBIECTUL II</span>
+      <span class="section-points">30 Puncte</span>
+    </div>
+
+    <!-- II.1 Completare spații (15p) -->
+    <p style="color: var(--blue-primary); font-weight: bold; margin-bottom: 12px;">1. Completați spațiile libere cu termenii corespunzători (15p - 5p/termen - Răspuns Deschis):</p>
+    
+    <div class="question" id="q-ii1a">
+      <div class="q-title"><span>a) Stratificarea materialelor textile la aceeași lungime și lățime pentru croire se numește:</span> <span class="q-points">(5p)</span></div>
+      <input type="text" id="open-ii1a" placeholder="Escriu termenul (ex. șpănuire)...">
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkText('open-ii1a', ['șpănuire', 'spanuire', 'șpănuirea', 'spanuirea'], 5)">Verifică</button>
+        <button class="btn-item" onclick="toggle('hint-ii1a')">Indicație</button>
+        <button class="btn-item" onclick="toggle('ans-ii1a')">Vezi Răspuns</button>
+      </div>
+      <div id="hint-ii1a" class="hint-box">Consistă în suprapunerea mai multor straturi de material (p. 17).</div>
+      <div id="ans-ii1a" class="answer-box">Răspuns corect: Șpănuirea.</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-ii1b">
+      <div class="q-title"><span>b) Instrumentele ascuțite, cum sunt foarfecele, trebuie să fie în stare bună de funcționare pentru a evita:</span> <span class="q-points">(5p)</span></div>
+      <input type="text" id="open-ii1b" placeholder="Escriu termenul (ex. accidentele / rănirea)...">
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkText('open-ii1b', ['accident', 'accidente', 'rănir', 'ranir'], 5)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-ii1b')">Vezi Răspuns</button>
+      </div>
+      <div id="ans-ii1b" class="answer-box">Răspuns corect: Accidentele (sau rănirea).</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-ii1c">
+      <div class="q-title"><span>c) Știința care studiază adaptarea condițiilor de muncă la posibilitățile corpului uman se numește:</span> <span class="q-points">(5p)</span></div>
+      <input type="text" id="open-ii1c" placeholder="Escriu denumirea științei...">
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkText('open-ii1c', ['ergonomie', 'ergonomia'], 5)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-ii1c')">Vezi Răspuns</button>
+      </div>
+      <div id="ans-ii1c" class="answer-box">Răspuns corect: Ergonomie.</div>
+      <div class="feedback"></div>
+    </div>
+
+    <!-- II.2 Cerințe aplicații SSM și Ergonomie (15p) -->
+    <p style="color: var(--blue-primary); font-weight: bold; margin-top: 25px; margin-bottom: 12px;">2. Aplicație practică de securitate și ergonomie (15p - Răspuns Deschis):</p>
+
+    <div class="question" id="q-ii2a">
+      <div class="q-title"><span>a) Menționați două reguli de securitate și sănătate în muncă la utilizarea mașinii de cusut sau a fierului de călcat:</span> <span class="q-points">(5p)</span></div>
+      <textarea id="open-ii2a" placeholder="Menționați oprirea la defecțiuni, mânuirea cu atenție, purtarea echipamentului de protecție..."></textarea>
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkText('open-ii2a', ['opri', 'echipament', 'protecț', 'atenți', 'cald', 'abur'], 5)">Verifică</button>
+        <button class="btn-item" onclick="toggle('ans-ii2a')">Vezi Răspuns Barem</button>
+      </div>
+      <div id="ans-ii2a" class="answer-box">Reguli SSM: Oprirea imediată a mașinii în caz de defecțiuni mecanice sau electrice, manevrarea cu atenție a stațiilor de călcat cu abur și purtarea echipamentului de protecție.</div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="question" id="q-ii2b">
+      <div class="q-title"><span>b) Descrieți două măsuri ergonomice pe care trebuie să le respecte un croitor la locul de muncă pentru evitarea oboselii:</span> <span class="q-points">(10p)</span></div>
+      <input type="text" id="open-ii2b-adv1" placeholder="Măsură 1 (ex. adoptarea unei poziții corecte a corpului)..." style="margin-bottom:8px;">
+      <input type="text" id="open-ii2b-adv2" placeholder="Măsură 2 (ex. executarea mișcărilor simetrice, păstrarea curățeniei)..." style="margin-bottom:8px;">
+      <div class="item-actions" data-html2canvas-ignore="true">
+        <button class="btn-item" onclick="checkDiffs()">Verifică Măsurile</button>
+        <button class="btn-item" onclick="toggle('ans-ii2b')">Vezi Răspuns Barem</button>
+      </div>
+      <div id="ans-ii2b" class="answer-box">
+        <strong>Măsuri ergonomice (p. 18):</strong> Adoptarea unei poziții drepte/corecte a corpului,
